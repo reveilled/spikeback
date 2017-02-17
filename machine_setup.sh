@@ -1,6 +1,6 @@
 stub()
 {
-	echo stub > /dev/null
+	echo "stub" > /dev/null
 }
 
 #install nut and dependencies
@@ -51,39 +51,110 @@ install_gnuradio(){
 }
 
 #install hackrf software
-hackrf_deps=()
+hackrf_deps=(build-essential cmake libusb-1.0-0-dev pkg-config libfftw3-dev)
 install_hackrf()
 {
-	stub
+	git clone https://github.com/mossmann/hackrf.git
+	pushd hackrf
+
+	mkdir host/build
+	cd host/build
+	cmake ..
+	make
+	sudo make install
+	sudo ldconfig
+
+	popd
 }
 
 #install rtl-sdr software
 rtl_sdr_deps=()
 install_rtlsdr()
 {
-	stub
+	#blacklist the drivers that get in the way
+	touch no-rtl.conf
+	echo blacklist rtl dvb_usb_rtl28xxu >> no-rtl.conf
+	echo blacklist rtl2832 >> no-rtl.conf
+	echo blacklist rtl2830 >> no-rtl.conf
+	sudo mv no-rtl.conf /etc/modprobe.d
+
+	git clone git://git.osmoscom.org/rtl-sdr.com
+	mkdir rtl-sdr/build
+	cd rtl-sdr/build
+	cmake ../ -DINSTALL_UDEV_RULES=ON
+	make
+	sudo make install
+	sudo ldconfig
+	cp rtl-sdr.rules /etc/udev/rules.d
+		
+	#reinit modprobe and udev
 }
 
 #install and configure GPIO
 
 #install the wiki and 
-wiki_deps=()
+wiki_deps=( mediawiki imagemagick)
 install_wiki()
+{
+	#get the push extension
+	wget https://extdist.wmflabs.org/dist/extensions/Push-REL1_28-03290b5.tar.gz
+	sudo tar -xzf Push-REL1_28-03290b5.tar.gz -C /var/lib/mediawiki/extensions
+
+	#link in the wiki
+	sudo ln -s /var/lib/mediawiki /var/www/html/wiki
+
+	#set up mysql user
+	mysql -u root -p < wiki_files/create_wiki_usr.sql
+
+	#Have the installer actually configure the wiki
+	echo Kindly install the wiki
+	#get a user response
+	read -n1 -r -p "Press any key to continue..." key
+}
+
+bitscope_deps=( libpango1.0-0 libpangox-1.0-0 libpangoxft-1.0-0 )
+install_bitscope()
+{
+	mkdir bitscope_debs
+	pushd bitscope_debs
+
+	wget http://bitscope.com/download/files/bitscope-dso_2.8.FE22H_armhf.deb  
+	wget http://bitscope.com/download/files/bitscope-logic_1.2.FC20C_armhf.deb 
+	wget http://bitscope.com/download/files/bitscope-meter_2.0.FK22G_armhf.deb 
+	wget http://bitscope.com/download/files/bitscope-chart_2.0.FK22M_armhf.deb 
+	wget http://bitscope.com/download/files/bitscope-proto_0.9.FG13B_armhf.deb 
+	wget http://bitscope.com/download/files/bitscope-console_1.0.FK29A_armhf.deb 
+	wget http://bitscope.com/download/files/bitscope-display_1.0.EC17A_armhf.deb 
+	wget http://bitscope.com/download/files/bitscope-server_1.0.FK26A_armhf.deb 
+
+	#bitscope console is messed up until I can find bitscope-link
+	sudo dpkg -i *.deb
+
+	popd
+}
+
+python_deps=(python-argparse python-argcomplete python-crypto python-cryptography python-serial python-pexpect python-zmq python-scapy python-protobuf)
+install_python_deps()
 {
 	stub
 }
 
 #install apps I like
-desktop_app_deps=(htop tmux vim)
+#should probably add in some Bluetooth tools
+desktop_app_deps=(htop tmux vim git build-essential cmake autoconf)
 install_desktop_apps()
 {
 	stub
 }
 
-sudo apt-get install ${desktop_app_deps[@]} ${nut_deps[@]} ${gnuradio_deps[@]} ${hackrf_deps[@]} ${rtl_sdr_deps[@]} ${wiki_deps[@]} 
+
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install ${desktop_app_deps[@]} ${nut_deps[@]} ${gnuradio_deps[@]} ${hackrf_deps[@]} ${rtl_sdr_deps[@]} ${wiki_deps[@]} ${bitscope_deps[@]} ${python_deps[@]} 
 install_nut
 install_gnuradio
 install_hackrf
 install_rtlsdr
 install_wiki
 install_desktop_apps
+sudo reboot
