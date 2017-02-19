@@ -65,13 +65,14 @@ install_gnuradio(){
 hackrf_deps=(build-essential cmake libusb-1.0-0-dev pkg-config libfftw3-dev)
 install_hackrf()
 {
+	sudo apt-get remove hackrf libhackrf0
 	git clone https://github.com/mossmann/hackrf.git
 	pushd hackrf
 
 	mkdir host/build
 	cd host/build
 	cmake ..
-	make
+	make -j 4
 	sudo make install
 	sudo ldconfig
 
@@ -84,20 +85,22 @@ install_rtlsdr()
 {
 	#blacklist the drivers that get in the way
 	touch no-rtl.conf
-	echo blacklist rtl dvb_usb_rtl28xxu >> no-rtl.conf
+	echo blacklist dvb_usb_rtl28xxu >> no-rtl.conf
 	echo blacklist rtl2832 >> no-rtl.conf
 	echo blacklist rtl2830 >> no-rtl.conf
 	sudo mv no-rtl.conf /etc/modprobe.d
 
-	git clone git://git.osmoscom.org/rtl-sdr.com
+	git clone git://git.osmocom.org/rtl-sdr.git
 	mkdir rtl-sdr/build
-	cd rtl-sdr/build
+	pushd rtl-sdr/build
 	cmake ../ -DINSTALL_UDEV_RULES=ON
-	make
+	make -j 4
 	sudo make install
 	sudo ldconfig
-	cp rtl-sdr.rules /etc/udev/rules.d
-		
+	cd ..
+	sudo cp rtl-sdr.rules /etc/udev/rules.d
+	sudo udevadm control --reload-rules
+	popd
 	#reinit modprobe and udev
 }
 
