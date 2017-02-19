@@ -133,7 +133,7 @@ install_wiki()
 	#probably configure push here with some kind of appends
 }
 
-bitscope_deps=( libpango1.0-0 libpangox-1.0-0 libpangoxft-1.0-0 )
+bitscope_deps=(libpango1.0-0 libpangox-1.0-0 libpangoxft-1.0-0 screen)
 install_bitscope()
 {
 	mkdir bitscope_debs
@@ -151,6 +151,15 @@ install_bitscope()
 	#bitscope console is messed up until I can find bitscope-link
 	sudo dpkg -i *.deb
 	popd
+
+	#Using the server as a service nuke the system log.
+	#best use screen until the issue is resolved
+	#copy in the service config and get it started
+	#sudo cp bitscope_files/bitscope.service lib/systemd/system
+	#sudo systemctl daemon-reload
+	#sudo systemctl enable bitscope.service
+	#sudo systemctl start bitscope.service
+
 }
 
 note_deps=(fswebcam avconv libv4l-* lame libx264* libasound2-dev libalsaplayer-dev oss-compat alsa-oss streamer python-poster tempfile)
@@ -201,6 +210,7 @@ install_gnuradio
 install_hackrf
 install_rtlsdr
 install_wiki
+install_bitscope
 install_note_taking
 install_lab_shell
 install_python_deps
