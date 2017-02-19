@@ -126,6 +126,11 @@ install_wiki()
 	echo Kindly install the wiki
 	#get a user response
 	read -n1 -r -p "Press any key to continue..." key
+
+	#make sure you can upload large files and from websites
+	echo "\$wgAllowCopyUploads=true;" >> /etc/mediawiki/LocalSettings.php
+	echo "\$wgCheckFileExtensions=false;" >> /etc/mediawiki/LocalSettings.php
+	#probably configure push here with some kind of appends
 }
 
 bitscope_deps=( libpango1.0-0 libpangox-1.0-0 libpangoxft-1.0-0 )
@@ -167,6 +172,12 @@ install_note_taking()
 
 }
 
+labshell_deps=(dsh)
+install_lab_shell()
+{
+	stub
+}
+
 python_deps=(python-argparse python-argcomplete python-crypto python-cryptography python-serial python-pexpect python-zmq python-scapy python-protobuf)
 install_python_deps()
 {
@@ -175,7 +186,7 @@ install_python_deps()
 
 #install apps I like
 #should probably add in some Bluetooth tools
-desktop_app_deps=(htop tmux vim git build-essential cmake autoconf)
+desktop_app_deps=(htop tmux vim git build-essential cmake autoconf minicom)
 install_desktop_apps()
 {
 	stub
@@ -184,12 +195,14 @@ install_desktop_apps()
 
 sudo apt-get update
 sudo apt-get upgrade
-sudo apt-get install ${desktop_app_deps[@]} ${nut_deps[@]} ${gnuradio_deps[@]} ${hackrf_deps[@]} ${rtl_sdr_deps[@]} ${wiki_deps[@]} ${bitscope_deps[@]} ${python_deps[@]} 
+sudo apt-get install -y ${desktop_app_deps[@]} ${nut_deps[@]} ${gnuradio_deps[@]} ${hackrf_deps[@]} ${rtl_sdr_deps[@]} ${wiki_deps[@]} ${bitscope_deps[@]} ${labshell_deps[@]} ${python_deps[@]}
 install_nut
 install_gnuradio
 install_hackrf
 install_rtlsdr
 install_wiki
 install_note_taking
+install_lab_shell
+install_python_deps
 install_desktop_apps
 sudo reboot
