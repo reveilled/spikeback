@@ -4,17 +4,28 @@ stub()
 }
 
 #install nut and dependencies
-nut_deps=(dh-autoreconf libusb* libsnmp-dev libneon27-dev libavahi-client-dev libavahi-common3 libavahi-core-dev libavahi-core7 libavahi-glib1 libavahi-glib-dev libavahi-common-dev libavahi1.0-cil libavahi-cil-dev powerman libpowerman0 libpowerman0 libpowerman0-dev nut-powerman-pdu libfreeipmi16 libfreeipmi16 freeipmi-* libipmi* libgd3 libgd-dev autoconf)
+#nut_deps=(dh-autoreconf libusb* libsnmp-dev libneon27-dev libavahi-client-dev libavahi-common3 libavahi-core-dev libavahi-core7 libavahi-glib1 libavahi-glib-dev libavahi-common-dev libavahi1.0-cil libavahi-cil-dev powerman libpowerman0 libpowerman0 libpowerman0-dev nut-powerman-pdu libfreeipmi16 libfreeipmi16 freeipmi-* libipmi* libgd3 libgd-dev autoconf)
+
+nut_deps=(nut nut-server nut-client)
 
 install_nut()
 {
-	wget http://www.networkupstools.org/source/2.7/nut-2.7.4.tar.gz
-	tar -xzf nut-2.7.4.tar.gz 
-	pushd nut-2.7.4/
+#	wget http://www.networkupstools.org/source/2.7/nut-2.7.4.tar.gz
+#	tar -xzf nut-2.7.4.tar.gz 
+#	pushd nut-2.7.4/
+#
+#	autoconf
+#	./configure --with-all
+#	make -j 4
+#	sudo make install
+#	popd
 
-	autoconf
-	./configure --with-all
-	make install
+	pushd nut-files
+	cd rules
+	sudo cp * /etc/udev/rules.d
+	sudo udevadm control --reload-rules
+	cd ../config
+	sudo cp * /etc/nut/
 	popd
 
 	#probably some ups configuration stuff
