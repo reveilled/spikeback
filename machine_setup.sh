@@ -110,9 +110,11 @@ install_rtlsdr()
 wiki_deps=( mediawiki imagemagick)
 install_wiki()
 {
+	#turns out this is offered at install
 	#get the push extension
-	wget https://extdist.wmflabs.org/dist/extensions/Push-REL1_28-03290b5.tar.gz
-	sudo tar -xzf Push-REL1_28-03290b5.tar.gz -C /var/lib/mediawiki/extensions
+	#wget https://extdist.wmflabs.org/dist/extensions/Push-REL1_28-03290b5.tar.gz
+	#sudo tar -xzf Push-REL1_28-03290b5.tar.gz -C /var/lib/mediawiki/extensions
+	#configure push at some point
 
 	#link in the wiki
 	sudo ln -s /var/lib/mediawiki /var/www/html/wiki
@@ -143,8 +145,26 @@ install_bitscope()
 
 	#bitscope console is messed up until I can find bitscope-link
 	sudo dpkg -i *.deb
-
 	popd
+}
+
+note_deps=(fswebcam avconv libv4l-* lame libx264* libasound2-dev libalsaplayer-dev oss-compat alsa-oss streamer python-poster tempfile)
+install_note_taking()
+{
+	#load up kernel modules
+	sudo modprobe snd_pcm_oss
+	sudo modprobe snd_mixer_oss
+
+	#set up the wiki botz
+
+	#clone ffmpeg, consider using a prebuilt
+	git clone git://source.ffmpeg.org/ffmpeg.git
+	pushd ffmpeg
+	./configure --enable-gpl --enable-libx264 --enable-mmal --enable-indev=alsa
+	make
+	sudo make install
+	popd
+
 }
 
 python_deps=(python-argparse python-argcomplete python-crypto python-cryptography python-serial python-pexpect python-zmq python-scapy python-protobuf)
@@ -170,5 +190,6 @@ install_gnuradio
 install_hackrf
 install_rtlsdr
 install_wiki
+install_note_taking
 install_desktop_apps
 sudo reboot
